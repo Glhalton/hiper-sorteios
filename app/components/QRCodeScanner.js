@@ -1,7 +1,7 @@
 "use client";
 
 import { Html5Qrcode } from "html5-qrcode";
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from "react";
 
 export default function QRCodeScanner() {
   const [result, setResult] = useState("Nenhum QR lido ainda");
@@ -15,6 +15,10 @@ export default function QRCodeScanner() {
       .start(
         {
           facingMode: "environment",
+          videoConstraints: {
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+          },
         },
         {
           fps: 10,
