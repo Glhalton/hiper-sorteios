@@ -9,29 +9,35 @@ export default function QRCodeScanner() {
   const html5QrCodeRef = useRef(null);
 
   useEffect(() => {
-    html5QrCodeRef.current = new Html5Qrcode(qrCodeRegionId);
+    Html5Qrcode.getCameras()
+      .then((devices) => {
+        if (devices && devices.length) {
+          // procura a câmera traseira
+          const rearCamera =
+            devices.find(
+              (device) => device.label.toLowerCase().includes("back") || device.label.toLowerCase().includes("rear"),
+            ) || devices[0];
 
-    html5QrCodeRef.current
-      .start(
-        {
-          facingMode: "environment",
-          videoConstraints: {
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-          },
-        },
-        {
-          fps: 10,
-          qrbox: 250,
-        },
-        (decodedText, decodedResult) => {
-          setResult(decodedText);
-        },
-        (errorMessage) => {
-          console.warn("Erro ao ler QR code: ", errorMessage);
-        },
-      )
-      .catch((err) => console.error("Não foi possível iniciar o scanner", err));
+          html5QrCodeRef.current = new Html5Qrcode(qrCodeRegionId);
+
+          html5QrCodeRef.current
+            .start(
+              rearCamera.id, // passa o deviceId correto
+              {
+                fps: 10,
+                qrbox: 250,
+              },
+              (decodedText, decodedResult) => {
+                setResult(decodedText);
+              },
+              (errorMessage) => {
+                console.warn("Erro ao ler QR code:", errorMessage);
+              },
+            )
+            .catch((err) => console.error("Não foi possível iniciar o scanner", err));
+        }
+      })
+      .catch((err) => console.error("Não conseguiu listar câmeras", err));
 
     return () => {
       html5QrCodeRef.current?.stop().catch((err) => console.error(err));
